@@ -4,7 +4,6 @@ const _ = require('underscore');
 const counter = require('./counter');
 
 var items = {};
-
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
 exports.create = (text, callback) => {
@@ -42,13 +41,33 @@ exports.readAll = (callback) => {
   });
 };
 
+
+
 exports.readOne = (id, callback) => {
-  var text = items[id];
-  if (!text) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback(null, { id, text });
-  }
+  var filePath = path.join(exports.dataDir, `${id}.txt`);
+  // console.log(filePath);
+  fs.readFile(filePath, (err, fileData) => {
+    if (err) {
+      console.log(`No item with id: ${id}`);
+      callback(err);
+    } else {
+      console.log(`${id}`);
+      console.log('data', fileData.toJSON());
+      console.log(filePath.split('.')[0].split('/')[7]);
+      callback(null, { id: id, text: fileData });
+    }
+  });
+
+
+
+
+
+  // var text = items[id];
+  // if (!text) {
+  //   callback(new Error(`No item with id: ${id}`));
+  // } else {
+  //   callback(null, { id, text });
+  // }
 };
 
 exports.update = (id, text, callback) => {
