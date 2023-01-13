@@ -45,16 +45,13 @@ exports.readAll = (callback) => {
 
 exports.readOne = (id, callback) => {
   var filePath = path.join(exports.dataDir, `${id}.txt`);
-  // console.log(filePath);
   fs.readFile(filePath, (err, fileData) => {
     if (err) {
       console.log(`No item with id: ${id}`);
       callback(err);
     } else {
-      console.log(`${id}`);
-      console.log('data', fileData.toJSON());
-      console.log(filePath.split('.')[0].split('/')[7]);
-      callback(null, { id: id, text: fileData });
+      console.log({ id: id, text: fileData.toString() });
+      callback(null, { id: id, text: fileData.toString() });
     }
   });
 
