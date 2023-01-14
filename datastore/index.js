@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
+var Promise = require('bluebird');
+const fsPromised = Promise.promisifyAll(fs);
 
 var items = {};
 // Public API - Fix these CRUD functions ///////////////////////////////////////
@@ -26,22 +28,24 @@ exports.create = (text, callback) => {
 };
 
 exports.readAll = (callback) => {
-  fs.readdir(exports.dataDir, (err, files) => {
-    var data = [];
-    if (err) {
-      console.log('error in readALL files');
-    } else {
-      files.forEach((file) => {
+  return fsPromised.readdirAsync(exports.dataDir)
+    .then((files) => {
+      var data = files.map((file) => {
         var id = file.split('.')[0];
-        var text = file.split('.')[0];
-        data.push({ id, text });
+        var filePath = path.join(exports.dataDir, file);
+        return fsPromised.readFileAsync(filePath)
+          .then((fileData) => {
+            return ({ id: id, text: fileData.toString() });
+          });
       });
-    }
-    callback(null, data);
-  });
+      Promise.all(data).then((data) => {
+        callback(null, data);
+      })
+        .catch((err) => {
+          callback(err);
+        });
+    });
 };
-
-
 
 exports.readOne = (id, callback) => {
   var filePath = path.join(exports.dataDir, `${id}.txt`);
@@ -90,7 +94,7 @@ exports.delete = (id, callback) => {
       console.log(`No item with id: ${id}`);
       callback(err);
     } else {
-      console.lo(`${id}.txt was deleted`);
+      console.log(`${id}.txt was deleted`);
       callback();
     }
   });
