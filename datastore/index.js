@@ -54,27 +54,33 @@ exports.readOne = (id, callback) => {
       callback(null, { id: id, text: fileData.toString() });
     }
   });
-
-
-
-
-
-  // var text = items[id];
-  // if (!text) {
-  //   callback(new Error(`No item with id: ${id}`));
-  // } else {
-  //   callback(null, { id, text });
-  // }
 };
 
 exports.update = (id, text, callback) => {
-  var item = items[id];
-  if (!item) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    items[id] = text;
-    callback(null, { id, text });
-  }
+  var filePath = path.join(exports.dataDir, `${id}.txt`);
+  fs.readFile(filePath, (err, fileData) => {
+    if (err) {
+      console.log(`No item with id: ${id}`);
+      callback(err);
+    } else {
+      fs.writeFile(filePath, text, (err) => {
+        if (err) {
+          console.log(`error writing with id: ${id}`);
+          callback(err);
+        } else {
+          callback(null, { id: id, text: text });
+        }
+      });
+    }
+  });
+
+  // var item = items[id];
+  // if (!item) {
+  //   callback(new Error(`No item with id: ${id}`));
+  // } else {
+  //   items[id] = text;
+  //   callback(null, { id, text });
+  // }
 };
 
 exports.delete = (id, callback) => {
